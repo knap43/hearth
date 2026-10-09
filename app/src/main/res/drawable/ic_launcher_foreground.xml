@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer flame -->
+    <path
+        android:fillColor="#FFB067"
+        android:pathData="M54,30 C61,40 71,47 71,61 C71,71 63.4,78 54,78 C44.6,78 37,71 37,62 C37,55 40.5,50.5 45,46.5 C45,52.5 48,56 51.5,56 C49,47 50.5,38 54,30 Z" />
+    <!-- Inner ember -->
+    <path
+        android:fillColor="#1C1714"
+        android:fillAlpha="0.55"
+        android:pathData="M55,56 C58.5,60 62,63 62,67.5 C62,71.6 58.4,74 54.5,74 C50.6,74 47.5,71.4 47.5,67.8 C47.5,63.5 51.5,61.5 55,56 Z" />
+</vector>

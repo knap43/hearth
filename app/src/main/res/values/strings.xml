@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Hearth</string>
+    <string name="lock_service_label">Hearth screen lock</string>
+    <string name="lock_service_description">Lets Hearth lock the screen when you use the lock gesture on the home screen. It reads nothing on screen and observes no events.</string>
+</resources>
