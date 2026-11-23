@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hearth"
+version = "0.1.0"
+description = "A terminal game launcher: Windows games through Proton (umu-launcher) with a Wine fallback, and native Linux ports"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "GPL-3.0-or-later"
+# umu-launcher is a system dependency (not on PyPI); see packaging/PKGBUILD.
+dependencies = ["textual>=1.0"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+hearth = "hearth.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

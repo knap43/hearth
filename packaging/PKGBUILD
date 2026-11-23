@@ -1,0 +1,25 @@
+# Build from a checkout:  cd packaging && makepkg -si
+pkgname=hearth
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Terminal game launcher: Windows games via Proton (umu-launcher) with Wine fallback, plus native Linux ports"
+arch=('any')
+license=('GPL-3.0-or-later')
+depends=('python' 'python-textual' 'umu-launcher')
+optdepends=('wine: fallback runner for Windows games'
+            'winetricks: install Windows components into the prefix'
+            'gamemode: gamemoderun wrapper'
+            'mangohud: performance overlay')
+makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
+
+build() {
+  cd "$startdir/.."
+  rm -rf dist
+  python -m build --wheel --no-isolation
+}
+
+package() {
+  cd "$startdir/.."
+  python -m installer --destdir="$pkgdir" dist/*.whl
+  install -Dm644 packaging/hearth.fish "$pkgdir/usr/share/fish/vendor_completions.d/hearth.fish"
+}
