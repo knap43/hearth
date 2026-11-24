@@ -265,10 +265,13 @@ class Hearth(App):
     CSS = """
     #main { height: 1fr; }
     #left { width: 2fr; }
-    #search { border: tall $panel; }
+    /* one line, flush with the table below it: Input's own tall border is drawn
+       with half blocks that sit off the table's edge in many terminal fonts */
+    #search { border: none; height: 1; padding: 0 1; margin: 0 0 1 0; background: $panel; }
+    #search:focus { border: none; background: $panel-lighten-1; }
     #games { height: 1fr; }
     #message { padding: 1 2; color: $text-muted; }
-    #details { width: 1fr; min-width: 38; border-left: tall $panel; padding: 0 1; }
+    #details { width: 1fr; min-width: 38; border-left: solid $panel; padding: 0 1; }
     Dialog { align: center middle; }
     .dialog { width: 96; max-width: 96%; height: auto; max-height: 92%;
               border: thick $primary; background: $surface; padding: 1 2; }
