@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hearth"
 version = "0.1.0"
-description = "A terminal game launcher: Windows games through Proton (umu-launcher) with a Wine fallback, and native Linux ports"
+description = "A terminal game launcher: Windows games through Proton (umu-launcher) with a Wine fallback, native Linux ports, and console emulators"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "GPL-3.0-or-later"

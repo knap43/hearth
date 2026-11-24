@@ -5,8 +5,10 @@ from __future__ import annotations
 import json
 import os
 import tomllib
-from dataclasses import asdict, dataclass, field, fields
+from dataclasses import asdict, dataclass, field, fields, make_dataclass
 from pathlib import Path
+
+from .emulators import SYSTEMS
 
 
 def _xdg(var: str, fallback: str) -> Path:
@@ -59,15 +61,27 @@ class Launch:
     default_options: str = ""
 
 
+# Per console: <id>_dir, its ROM folder under the root (or an absolute path), and
+# <id>, the emulator's command line with %rom% where the ROM goes.
+Emulators = make_dataclass("Emulators", [
+    item for s in SYSTEMS.values()
+    for item in ((f"{s.id}_dir", str, field(default=s.folder)), (s.id, str, field(default=s.command)))
+])
+
+
 @dataclass
 class Config:
     library: Library = field(default_factory=Library)
     proton: Proton = field(default_factory=Proton)
     wine: Wine = field(default_factory=Wine)
     launch: Launch = field(default_factory=Launch)
+    emulators: Emulators = field(default_factory=Emulators)
 
     def platform_dir(self, platform: str) -> Path:
-        name = self.library.windows_dir if platform == "windows" else self.library.linux_dir
+        if platform in SYSTEMS:
+            name = getattr(self.emulators, f"{platform}_dir")
+        else:
+            name = self.library.windows_dir if platform == "windows" else self.library.linux_dir
         return expand(self.library.root) / expand(name)
 
 
@@ -113,6 +127,7 @@ class GameState:
     exe: str = ""           # chosen executable, relative to the game folder (or absolute)
     runner: str = "auto"    # Windows games: auto | proton | wine
     options: str = ""       # Steam-style launch options
+    command: str = ""       # console games: this game's emulator command, instead of the system's
     game_id: str = ""       # umu GAMEID override, for protonfixes
     playtime: int = 0       # seconds
     last_played: float = 0  # unix time

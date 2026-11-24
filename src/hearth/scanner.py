@@ -1,6 +1,7 @@
 """Finding games in the library and guessing which executable starts each one.
 
-Layout: <root>/<windows_dir>/... and <root>/<linux_dir>/... . Beneath each, a folder
+Layout: <root>/<windows_dir>/... and <root>/<linux_dir>/... ; console ROMs are
+found by scan_roms in a folder per system (see emulators.py). Beneath each, a folder
 that holds only folders is a *category* and is descended into (up to max_depth);
 a folder holding files, or the usual game subfolders (bin, Binaries, *_Data, ...),
 is a *game*. Marker files override the guess:
@@ -265,8 +266,38 @@ def find_executables(game_dir: Path, platform: str, game_name: str | None = None
     return found
 
 
+def scan_roms(base: Path, system: str, max_depth: int = 4) -> list[Game]:
+    """Console games: every ROM file under the system's folder (see emulators.py)."""
+    from .emulators import SYSTEMS, display_name, roms_in
+
+    spec = SYSTEMS[system]
+    games: list[Game] = []
+
+    def walk(directory: Path, parts: list[str], depth: int) -> None:
+        for rom in roms_in(directory, spec):
+            rel = "/".join([*parts, rom.name])
+            games.append(Game(key=f"{system}/{rel}", platform=system, path=rom,
+                              folder=display_name(rom), category=" / ".join(parts), candidates=[rom]))
+        if depth >= max_depth:
+            return
+        for entry in sorted(_visible_entries(directory), key=lambda e: e.name.lower()):
+            try:
+                if entry.is_dir() and not _has(Path(entry.path), IGNORE_MARK):
+                    walk(Path(entry.path), [*parts, entry.name], depth + 1)
+            except OSError:
+                continue
+
+    if base.is_dir():
+        walk(base, [], 0)
+    return games
+
+
 def scan_library(cfg) -> list[Game]:
+    from .emulators import SYSTEMS
+
     games: list[Game] = []
     for platform in PLATFORMS:
         games += scan_platform(cfg.platform_dir(platform), platform, cfg.library.max_depth)
+    for system in SYSTEMS:
+        games += scan_roms(cfg.platform_dir(system), system, cfg.library.max_depth)
     return games

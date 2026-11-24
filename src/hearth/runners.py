@@ -16,6 +16,7 @@ import stat
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import emulators
 from .config import Config, GameState, expand
 from .scanner import WINDOWS, Game
 
@@ -36,7 +37,7 @@ class LaunchSpec:
     argv: list[str]
     env: dict[str, str]
     cwd: str
-    runner: str           # "proton", "wine" or "native"
+    runner: str           # "proton", "wine", "native" or "emulator"
     note: str = ""        # e.g. why Wine was used instead of Proton
 
     def describe(self) -> str:
@@ -143,7 +144,16 @@ def proton_label(build: str) -> str:
 
 # --- building the command ------------------------------------------------------------
 
+def emulator_command(game: Game, state: GameState, cfg: Config) -> str:
+    """The command line a console game starts with: its own, or its system's."""
+    return state.command or getattr(cfg.emulators, game.platform)
+
+
 def resolve_exe(game: Game, state: GameState) -> Path:
+    if game.platform in emulators.SYSTEMS:
+        if not game.path.is_file():
+            raise LaunchError(f"The ROM no longer exists: {game.path}")
+        return game.path
     if state.exe:
         exe = expand(state.exe)
         exe = exe if exe.is_absolute() else game.path / exe
@@ -201,7 +211,18 @@ def build_launch(game: Game, state: GameState, cfg: Config, base_env=None) -> La
     env = dict(os.environ if base_env is None else base_env)
     cwd = str(exe.parent)
 
-    if game.platform == WINDOWS:
+    if game.platform in emulators.SYSTEMS:
+        system = emulators.SYSTEMS[game.platform]
+        line = emulator_command(game, state, cfg)
+        try:
+            command = emulators.command_argv(line, exe)
+        except ValueError as exc:
+            raise LaunchError(f"Cannot parse the {system.title} command {line!r}: {exc}") from exc
+        if not command or not emulators.find_emulator(line):
+            raise LaunchError(f"{command[0] if command else 'No emulator'} was not found: install "
+                              f"{system.emulator}, or change the {system.title} command in Settings.")
+        runner, note = "emulator", ""
+    elif game.platform == WINDOWS:
         runner, note = windows_runner(state)
         if runner == "proton":
             env.update(proton_env(cfg, state))

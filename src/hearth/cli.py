@@ -8,6 +8,7 @@ import time
 
 from . import __version__, sessions
 from .config import CONFIG_FILE, GameStore, load_config
+from .emulators import SYSTEMS, find_emulator
 from .runners import LaunchError, build_launch, find_umu
 from .scanner import scan_library
 
@@ -32,13 +33,17 @@ def cmd_list(args) -> int:
             print(_name(g, store))
         return 0
     if not games:
-        print(f"No games found under {cfg.platform_dir('windows')} or {cfg.platform_dir('linux')}.")
+        print(f"No games found under {cfg.platform_dir('windows')}, {cfg.platform_dir('linux')}"
+              f" or the console folders (see `hearth doctor`).")
         return 0
     width = max(len(_name(g, store)) for g in games)
     for g in games:
         state = store.get(g.key)
-        exe = state.exe or (str(g.candidates[0].relative_to(g.path)) if g.candidates else "(no executable found)")
-        print(f"{_name(g, store):<{width}}  {g.platform:<7}  {sessions.format_duration(state.playtime):>8}  {exe}")
+        if g.platform in SYSTEMS:
+            exe = str(g.path)
+        else:
+            exe = state.exe or (str(g.candidates[0].relative_to(g.path)) if g.candidates else "(no executable found)")
+        print(f"{_name(g, store):<{width}}  {g.platform:<8}  {sessions.format_duration(state.playtime):>8}  {exe}")
     return 0
 
 
@@ -92,6 +97,11 @@ def cmd_doctor(_args) -> int:
     print(f"prefix:      {cfg.proton.prefix}")
     builds = installed_protons()
     print("installed:   " + (", ".join(p.name for p in builds) if builds else "none (umu downloads UMU-Proton)"))
+    for s in SYSTEMS.values():
+        path = cfg.platform_dir(s.id)
+        command = getattr(cfg.emulators, s.id)
+        emulator = find_emulator(command) or f"{s.emulator} NOT FOUND"
+        print(f"{s.id + ':':<12} {path}{'' if path.is_dir() else '  (missing)'}\n{'':12} {emulator}: {command}")
     return 0
 
 

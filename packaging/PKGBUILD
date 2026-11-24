@@ -9,7 +9,11 @@ depends=('python' 'python-textual' 'umu-launcher')
 optdepends=('wine: fallback runner for Windows games'
             'winetricks: install Windows components into the prefix'
             'gamemode: gamemoderun wrapper'
-            'mangohud: performance overlay')
+            'mangohud: performance overlay'
+            'mupen64plus: Nintendo 64 games'
+            'dolphin-emu: GameCube and Wii games'
+            'duckstation: PlayStation games (AppImage or AUR)'
+            'pcsx2: PlayStation 2 games (AppImage or AUR)')
 makedepends=('python-build' 'python-installer' 'python-setuptools' 'python-wheel')
 
 build() {

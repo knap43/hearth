@@ -2,7 +2,8 @@
 
 A terminal game launcher for Linux. It scans your games folder, runs Windows games through
 **Proton via [umu-launcher](https://github.com/Open-Wine-Components/umu-launcher)** (with
-**Wine** as the fallback) and starts native Linux ports directly.
+**Wine** as the fallback), starts native Linux ports directly, and plays **PlayStation,
+PlayStation 2, Nintendo 64, GameCube and Wii** ROMs through their emulators.
 
 ## Library layout
 
@@ -12,9 +13,15 @@ A terminal game launcher for Linux. It scans your games folder, runs Windows gam
 │   ├── Hollow Peak/        a game: a folder with files in it
 │   └── RPG/                a category: a folder holding only folders
 │       └── Ashen Crown/
-└── Linux/                  Linux games folder (name configurable)
-    └── Lantern Isle/
-        └── start.sh
+├── Linux/                  Linux games folder (name configurable)
+│   └── Lantern Isle/
+│       └── start.sh
+├── PS1/                    console ROMs: a folder per system (names configurable)
+│   ├── Spyro.chd           each ROM file is a game
+│   ├── Crash.cue           a .cue stands for the .bin tracks it names
+│   └── RPG/                sub-folders are categories
+│       └── Final.m3u       an .m3u is one multi-disc game
+├── PS2/  N64/  GameCube/  Wii/
 ```
 
 A folder holding files, or typical game sub-folders (`bin`, `Binaries`, `*_Data`, …), is
@@ -31,6 +38,30 @@ The executable is detected automatically. Installers, redistributables, crash re
 shared libraries are passed over, and names resembling the folder are preferred (`start.sh`
 for GOG Linux games). If the guess is wrong, press `e` to choose another; Hearth remembers
 the choice.
+
+## Consoles
+
+| folder | system | emulator | ROMs |
+|---|---|---|---|
+| `PS1` | PlayStation | DuckStation | `.cue` `.chd` `.pbp` `.m3u` `.iso` `.img` `.bin` `.ecm` `.mds` |
+| `PS2` | PlayStation 2 | PCSX2 | `.iso` `.chd` `.cso` `.zso` `.gz` `.bin` `.cue` `.img` `.mdf` `.nrg` `.m3u` `.elf` |
+| `N64` | Nintendo 64 | Mupen64Plus | `.z64` `.n64` `.v64` `.zip` |
+| `GameCube` | GameCube | Dolphin | `.iso` `.gcm` `.gcz` `.rvz` `.ciso` `.wia` `.dol` `.elf` `.m3u` |
+| `Wii` | Wii | Dolphin | `.iso` `.wbfs` `.rvz` `.wia` `.gcz` `.ciso` `.wad` `.dol` `.elf` |
+
+Games start fullscreen and straight into the game, and the emulator closes with it:
+
+```
+duckstation -batch -fullscreen -- %rom%
+pcsx2 -batch -nogui -fullscreen -- %rom%
+mupen64plus --fullscreen %rom%
+dolphin-emu -b -C Dolphin.Display.Fullscreen=True -e %rom%      (GameCube and Wii)
+```
+
+Each command can be changed in Settings, and per game with `e`; `%rom%` is the ROM's path (without
+it, the ROM goes last). Launch options wrap the emulator like any other game:
+`gamemoderun %command%`. For DuckStation to close when the game does, untick *Confirm Power Off* in
+its settings. The PlayStation emulators need a BIOS from your own console, set up in the emulator.
 
 ## Runners
 
@@ -51,7 +82,7 @@ the environment and everything else is passed to the game.
 
 | key       | action                         | key | action                         |
 |-----------|--------------------------------|-----|--------------------------------|
-| `p` / `⏎` | play                           | `f` | filter: all / Windows / Linux  |
+| `p` / `⏎` | play                           | `f` | filter: all / Windows / Linux / consoles |
 | `e`       | edit game (exe, runner, opts)  | `o` | sort: name / recent / playtime |
 | `x`       | stop (twice: kill)             | `r` | rescan                         |
 | `l`       | view the game's last log       | `w` | winecfg in the prefix          |

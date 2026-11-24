@@ -16,14 +16,16 @@ from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Ric
 
 from . import __version__, sessions
 from .config import CONFIG_FILE, Config, GameState, GameStore, expand, load_config, save_config
+from .emulators import SYSTEMS, find_emulator
 from .runners import (
-    RUNNER_LABELS, LaunchError, build_launch, find_umu, installed_protons, prefix_tool,
-    proton_label, resolve_exe, windows_runner,
+    RUNNER_LABELS, LaunchError, build_launch, emulator_command, find_umu, installed_protons,
+    prefix_tool, proton_label, resolve_exe, windows_runner,
 )
 from .scanner import LINUX, WINDOWS, Game, scan_library
 
-PLATFORM_LABEL = {WINDOWS: "Windows", LINUX: "Linux"}
-FILTERS = ("all", WINDOWS, LINUX)
+PLATFORM_LABEL = {WINDOWS: "Windows", LINUX: "Linux", **{s.id: s.label for s in SYSTEMS.values()}}
+CONSOLES = "consoles"
+FILTERS = ("all", WINDOWS, LINUX, CONSOLES)
 SORTS = ("name", "recent", "playtime")
 
 
@@ -75,6 +77,9 @@ class EditGame(Dialog):
         options = [(Text(f"Automatic: {best}"), "")] + [(Text(r), r) for r in rels]
         chosen = s.exe if s.exe in rels else ""
         custom = s.exe if s.exe and s.exe not in rels else ""
+        if g.platform in SYSTEMS:
+            yield from self.compose_console()
+            return
         with VerticalScroll(classes="dialog"):
             yield Static(f"[b]{escape(display_name(g, s))}[/b]  [dim]{escape(tilde(g.path))}[/dim]")
             yield from field("Name", Input(s.name, placeholder=g.folder, id="name"))
@@ -95,8 +100,34 @@ class EditGame(Dialog):
                 yield Button("Save", variant="primary", id="save")
                 yield Button("Cancel", id="cancel")
 
+    def compose_console(self) -> ComposeResult:
+        g, s = self.game, self.state
+        system = SYSTEMS[g.platform]
+        with VerticalScroll(classes="dialog"):
+            yield Static(f"[b]{escape(display_name(g, s))}[/b]  [dim]{escape(system.title)} · "
+                         f"{escape(tilde(g.path))}[/dim]")
+            yield from field("Name", Input(s.name, placeholder=g.folder, id="name"))
+            yield from field(
+                "Emulator command", Input(s.command, placeholder="the system's, from Settings", id="command"),
+                f"Only for this game. {escape('%rom%')} is replaced by the ROM; without it the ROM goes last.",
+            )
+            yield from field(
+                "Launch options", Input(s.options, placeholder="e.g. MANGOHUD=1 gamemoderun %command%", id="options"),
+                "Steam syntax, wrapped around the emulator's command.",
+            )
+            with Horizontal(classes="buttons"):
+                yield Button("Save", variant="primary", id="save")
+                yield Button("Cancel", id="cancel")
+
     @on(Button.Pressed, "#save")
     def save(self) -> None:
+        if self.game.platform in SYSTEMS:
+            self.dismiss({
+                "name": self.query_one("#name", Input).value.strip(),
+                "command": self.query_one("#command", Input).value.strip(),
+                "options": self.query_one("#options", Input).value.strip(),
+            })
+            return
         custom = self.query_one("#custom", Input).value.strip()
         if custom:
             path = expand(custom)
@@ -158,6 +189,17 @@ class Settings(Dialog):
                     yield from field("Wine binary", Input(c.wine.binary, id="wine_binary"))
                 with Vertical():
                     yield from field("Wine prefix", Input(c.wine.prefix, id="wine_prefix"))
+            yield Label("Consoles", classes="section")
+            yield Static(f"One folder of ROMs per system, under the library root. In a command, "
+                         f"{escape('%rom%')} is the ROM's path.", classes="hint")
+            for s in SYSTEMS.values():
+                found = find_emulator(getattr(c.emulators, s.id))
+                state = "" if found else "  [yellow](not found)[/yellow]"
+                with Horizontal(classes="pair"):
+                    with Vertical(classes="narrow"):
+                        yield from field(f"{s.title} folder", Input(getattr(c.emulators, f"{s.id}_dir"), id=f"{s.id}_dir"))
+                    with Vertical():
+                        yield from field(f"{s.emulator}{state}", Input(getattr(c.emulators, s.id), id=f"cmd_{s.id}"))
             yield Label("Launching", classes="section")
             yield from field(
                 "Default launch options", Input(c.launch.default_options, placeholder="e.g. gamemoderun %command%", id="default_options"),
@@ -186,6 +228,9 @@ class Settings(Dialog):
         c.wine.binary = self._value("wine_binary") or "wine"
         c.wine.prefix = self._value("wine_prefix") or c.wine.prefix
         c.launch.default_options = self._value("default_options")
+        for s in SYSTEMS.values():
+            setattr(c.emulators, f"{s.id}_dir", self._value(f"{s.id}_dir") or s.folder)
+            setattr(c.emulators, s.id, self._value(f"cmd_{s.id}") or s.command)
         self.dismiss(True)
 
 
@@ -234,6 +279,7 @@ class Hearth(App):
     .hint { color: $text-muted; text-style: italic; }
     .pair { height: auto; }
     .pair > Vertical { height: auto; width: 1fr; margin-right: 1; }
+    .pair > Vertical.narrow { width: 22; }
     .buttons { height: auto; margin-top: 1; align-horizontal: right; }
     .buttons Button { margin-left: 1; }
     """
@@ -293,7 +339,7 @@ class Hearth(App):
         self.action_rescan()
 
     def update_subtitle(self) -> None:
-        names = {"all": "all games", WINDOWS: "Windows only", LINUX: "Linux only"}
+        names = {"all": "all games", WINDOWS: "Windows only", LINUX: "Linux only", CONSOLES: "consoles only"}
         self.sub_title = f"{tilde(expand(self.cfg.library.root))} · {names[self.filter]} · sort: {self.sort}"
 
     # scanning
@@ -328,7 +374,10 @@ class Hearth(App):
         query = self.query_one("#search", Input).value.strip().lower()
         out = []
         for g in self.games:
-            if self.filter != "all" and g.platform != self.filter:
+            if self.filter == CONSOLES:
+                if g.platform not in SYSTEMS:
+                    continue
+            elif self.filter != "all" and g.platform != self.filter:
                 continue
             state = self.store.get(g.key)
             if query and query not in f"{display_name(g, state)} {g.folder} {g.category}".lower():
@@ -380,12 +429,14 @@ class Hearth(App):
         self.update_details()
 
     def empty_hint(self) -> str:
-        win, lin = self.cfg.platform_dir(WINDOWS), self.cfg.platform_dir(LINUX)
         lines = ["[b]No games found.[/b]", "", "Hearth looks in:"]
-        for label, path in (("Windows", win), ("Linux", lin)):
+        places = [("Windows", WINDOWS), ("Linux", LINUX)] + [(s.title, s.id) for s in SYSTEMS.values()]
+        for label, platform in places:
+            path = self.cfg.platform_dir(platform)
             state = "" if path.is_dir() else "  [yellow](missing)[/yellow]"
-            lines.append(f"  {label}: {escape(str(path))}{state}")
-        lines += ["", "Put each game in its own folder there (sub-folders for categories are fine),",
+            lines.append(f"  {label + ':':<15}{escape(tilde(path))}{state}")
+        lines += ["", "Put each PC game in its own folder, and console ROMs straight into their",
+                  "system's folder (sub-folders for categories are fine either way),",
                   "or press [b]s[/b] to point Hearth elsewhere."]
         return "\n".join(lines)
 
@@ -428,6 +479,24 @@ class Hearth(App):
             return
         g, s = sel
         lines = [f"[b]{escape(display_name(g, s))}[/b]", ""]
+        if g.platform in SYSTEMS:
+            system = SYSTEMS[g.platform]
+            line = emulator_command(g, s, self.cfg)
+            how = escape(system.emulator) + ("" if find_emulator(line) else "  [red](not installed)[/red]")
+            lines.append(f"[dim]{escape(system.title)} ·[/dim] {how}")
+            if g.category:
+                lines.append(f"[dim]Category:[/dim] {escape(g.category)}")
+            lines += ["", "[dim]ROM[/dim]", escape(tilde(g.path)), "",
+                      "[dim]Command[/dim]" + ("  [dim](this game's)[/dim]" if s.command else ""), escape(line)]
+            if s.options:
+                lines += ["", "[dim]Launch options[/dim]", escape(s.options)]
+            lines += ["", f"[dim]Played:[/dim] {sessions.format_duration(s.playtime)}"
+                          f"  [dim]· last:[/dim] {sessions.format_when(s.last_played)}"]
+            if g.key in self.running:
+                run = self.running[g.key]
+                lines.append(f"[green]Running for {sessions.format_duration(run.elapsed)}[/green]  [dim](x to stop)[/dim]")
+            info.update("\n".join(lines))
+            return
         if g.platform == WINDOWS:
             try:
                 runner, note = windows_runner(s)
@@ -495,7 +564,8 @@ class Hearth(App):
         self.store.save()
         if spec.note:
             self.notify(escape(spec.note), severity="warning")
-        via = {"proton": "Proton", "wine": "Wine", "native": "native"}[spec.runner]
+        via = {"proton": "Proton", "wine": "Wine", "native": "native"}.get(spec.runner) \
+            or SYSTEMS[g.platform].emulator
         self.notify(f"Starting {name} ({via})…")
         self.refresh_table()
 
