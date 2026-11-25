@@ -16,9 +16,9 @@ def _xdg(var: str, fallback: str) -> Path:
     return Path(value) if value else Path.home() / fallback
 
 
-CONFIG_DIR = _xdg("XDG_CONFIG_HOME", ".config") / "hearth"
-DATA_DIR = _xdg("XDG_DATA_HOME", ".local/share") / "hearth"
-STATE_DIR = _xdg("XDG_STATE_HOME", ".local/state") / "hearth"
+CONFIG_DIR = _xdg("XDG_CONFIG_HOME", ".config") / "retrohub"
+DATA_DIR = _xdg("XDG_DATA_HOME", ".local/share") / "retrohub"
+STATE_DIR = _xdg("XDG_STATE_HOME", ".local/state") / "retrohub"
 CONFIG_FILE = CONFIG_DIR / "config.toml"
 GAMES_FILE = DATA_DIR / "games.json"
 LOG_DIR = STATE_DIR / "logs"
@@ -109,7 +109,7 @@ def load_config(path: Path = CONFIG_FILE) -> Config:
 
 
 def save_config(cfg: Config, path: Path = CONFIG_FILE) -> None:
-    lines = ["# Hearth game launcher settings", ""]
+    lines = ["# RetroHub game launcher settings", ""]
     for section in fields(cfg):
         lines.append(f"[{section.name}]")
         for key, value in asdict(getattr(cfg, section.name)).items():

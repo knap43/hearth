@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from hearth import runners
-from hearth.config import Config, GameState, GameStore, load_config, save_config
-from hearth.runners import LaunchError, build_launch, parse_options
-from hearth.scanner import LINUX, WINDOWS, elf_kind, scan_library
+from retrohub import runners
+from retrohub.config import Config, GameState, GameStore, load_config, save_config
+from retrohub.runners import LaunchError, build_launch, parse_options
+from retrohub.scanner import LINUX, WINDOWS, elf_kind, scan_library
 
 ELF_EXEC = Path("/usr/bin/true")
 ELF_LIB = Path("/usr/lib/libz.so.1")  # a plain library (libc.so.6 is itself runnable)
@@ -34,7 +34,7 @@ def library(tmp_path):
     touch(win / "RPG" / "Classics" / "Old Keep" / "bin" / "x64" / "oldkeep.exe", 2_000_000)
     touch(win / "RPG" / "Classics" / "Old Keep" / "bin" / "x64" / "crashpad_handler.exe", 2_000_000)
     # ignored folder
-    touch(win / "Junk" / ".hearth-ignore", data=b"")
+    touch(win / "Junk" / ".retrohub-ignore", data=b"")
     touch(win / "Junk" / "thing.exe")
     # Linux: GOG layout, Unity layout with a .so, script-less ELF
     touch(lin / "Lantern Isle" / "start.sh", data=b"#!/bin/sh\necho hi\n")
@@ -185,7 +185,7 @@ def consoles(tmp_path):
         (fin / f"Final (Disc {d}).cue").write_text(f'FILE "Final (Disc {d}).bin" BINARY\n')
         touch(fin / f"Final (Disc {d}).bin")
     (fin / "Final.m3u").write_text("# discs\nFinal (Disc 1).cue\nFinal (Disc 2).cue\n")
-    touch(ps1 / "Junk" / ".hearth-ignore", data=b"")
+    touch(ps1 / "Junk" / ".retrohub-ignore", data=b"")
     touch(ps1 / "Junk" / "Skip.chd")
     touch(n64 / "Mario.z64")
     touch(gc / "Zelda.rvz")

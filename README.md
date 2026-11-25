@@ -1,4 +1,4 @@
-# Hearth
+# RetroHub
 
 A terminal game launcher for Linux. It scans your games folder, runs Windows games through
 **Proton via [umu-launcher](https://github.com/Open-Wine-Components/umu-launcher)** (with
@@ -30,13 +30,13 @@ deep. Marker files settle the matter when the guess goes wrong:
 
 | file               | effect                          |
 |--------------------|---------------------------------|
-| `.hearth-game`     | treat this folder as a game     |
-| `.hearth-category` | treat it as a category          |
-| `.hearth-ignore`   | skip it                         |
+| `.retrohub-game`     | treat this folder as a game     |
+| `.retrohub-category` | treat it as a category          |
+| `.retrohub-ignore`   | skip it                         |
 
 The executable is detected automatically. Installers, redistributables, crash reporters and
 shared libraries are passed over, and names resembling the folder are preferred (`start.sh`
-for GOG Linux games). If the guess is wrong, press `e` to choose another; Hearth remembers
+for GOG Linux games). If the guess is wrong, press `e` to choose another; RetroHub remembers
 the choice.
 
 ## Consoles
@@ -66,7 +66,7 @@ its settings. The PlayStation emulators need a BIOS from your own console, set u
 ## Runners
 
 * **Proton (default for Windows games):** `umu-run` with a single, shared prefix
-  (`~/.local/share/hearth/prefixes/proton`). The build is *UMU-Proton* (umu's default,
+  (`~/.local/share/retrohub/prefixes/proton`). The build is *UMU-Proton* (umu's default,
   downloaded on demand), *GE-Proton* (latest, downloaded on demand), or any installed build
   from `compatibilitytools.d`, chosen in Settings.
 * **Wine:** used automatically when umu-launcher is missing, or for any game whose runner you
@@ -92,19 +92,19 @@ the environment and everything else is passed to the game.
 ## Command line
 
 ```fish
-hearth                  # the TUI
-hearth list             # every game, its platform, playtime and executable
-hearth run hollow       # launch by (part of) a name, detached
-hearth run -w hollow    # stay attached: output here, playtime counted
-hearth doctor           # paths, umu/wine and installed Proton builds
+retrohub                  # the TUI
+retrohub list             # every game, its platform, playtime and executable
+retrohub run hollow       # launch by (part of) a name, detached
+retrohub run -w hollow    # stay attached: output here, playtime counted
+retrohub doctor           # paths, umu/wine and installed Proton builds
 ```
 
 ## Files
 
-* `~/.config/hearth/config.toml`: settings (also editable in the TUI with `s`)
-* `~/.local/share/hearth/games.json`: per-game choices and playtime
-* `~/.local/share/hearth/prefixes/`: the Proton and Wine prefixes
-* `~/.local/state/hearth/logs/`: the latest output of each game
+* `~/.config/retrohub/config.toml`: settings (also editable in the TUI with `s`)
+* `~/.local/share/retrohub/games.json`: per-game choices and playtime
+* `~/.local/share/retrohub/prefixes/`: the Proton and Wine prefixes
+* `~/.local/state/retrohub/logs/`: the latest output of each game
 
 ## Installing
 
@@ -119,5 +119,5 @@ Or for your user only, with umu-launcher installed separately:
 ```fish
 sudo pacman -S umu-launcher
 uv tool install --editable .
-cp packaging/hearth.fish ~/.config/fish/completions/
+cp packaging/retrohub.fish ~/.config/fish/completions/
 ```

@@ -1,4 +1,4 @@
-"""Command line: `hearth` opens the TUI; `hearth list` and `hearth run NAME` work without it."""
+"""Command line: `retrohub` opens the TUI; `retrohub list` and `retrohub run NAME` work without it."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def cmd_list(args) -> int:
         return 0
     if not games:
         print(f"No games found under {cfg.platform_dir('windows')}, {cfg.platform_dir('linux')}"
-              f" or the console folders (see `hearth doctor`).")
+              f" or the console folders (see `retrohub doctor`).")
         return 0
     width = max(len(_name(g, store)) for g in games)
     for g in games:
@@ -51,7 +51,7 @@ def cmd_run(args) -> int:
     cfg, store = load_config(), GameStore()
     matches = _find(" ".join(args.game), scan_library(cfg), store)
     if not matches:
-        print("No game matches that name. See `hearth list`.", file=sys.stderr)
+        print("No game matches that name. See `retrohub list`.", file=sys.stderr)
         return 1
     if len(matches) > 1:
         print("Several games match:\n  " + "\n  ".join(_name(g, store) for g in matches), file=sys.stderr)
@@ -61,16 +61,16 @@ def cmd_run(args) -> int:
     try:
         spec = build_launch(game, state, cfg)
     except LaunchError as exc:
-        print(f"hearth: {exc}", file=sys.stderr)
+        print(f"retrohub: {exc}", file=sys.stderr)
         return 1
     if spec.note:
-        print(f"hearth: {spec.note}", file=sys.stderr)
-    print(f"hearth: {spec.describe()}", file=sys.stderr)
+        print(f"retrohub: {spec.note}", file=sys.stderr)
+    print(f"retrohub: {spec.describe()}", file=sys.stderr)
     state.last_played = time.time()
     store.save()
     session = sessions.start(game.key, spec, detach=not args.wait)
     if not args.wait:
-        print(f"hearth: started {_name(game, store)}; log at {session.log}", file=sys.stderr)
+        print(f"retrohub: started {_name(game, store)}; log at {session.log}", file=sys.stderr)
         return 0
     try:
         code = session.proc.wait()
@@ -106,8 +106,8 @@ def cmd_doctor(_args) -> int:
 
 
 def main(argv=None) -> None:
-    parser = argparse.ArgumentParser(prog="hearth", description=__doc__)
-    parser.add_argument("--version", action="version", version=f"hearth {__version__}")
+    parser = argparse.ArgumentParser(prog="retrohub", description=__doc__)
+    parser.add_argument("--version", action="version", version=f"retrohub {__version__}")
     sub = parser.add_subparsers(dest="command")
     p = sub.add_parser("list", help="list the games in the library")
     p.add_argument("--names", action="store_true", help="names only, one per line")
@@ -117,7 +117,7 @@ def main(argv=None) -> None:
     p.add_argument("-w", "--wait", action="store_true",
                    help="stay attached: show the game's output here and count playtime")
     p.set_defaults(func=cmd_run)
-    p = sub.add_parser("doctor", help="show where Hearth looks and which runners it found")
+    p = sub.add_parser("doctor", help="show where RetroHub looks and which runners it found")
     p.set_defaults(func=cmd_doctor)
     args = parser.parse_args(argv)
     if not args.command:

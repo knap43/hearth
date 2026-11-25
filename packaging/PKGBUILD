@@ -1,5 +1,5 @@
 # Build from a checkout:  cd packaging && makepkg -si
-pkgname=hearth
+pkgname=retrohub
 pkgver=0.1.0
 pkgrel=1
 pkgdesc="Terminal game launcher: Windows games via Proton (umu-launcher) with Wine fallback, plus native Linux ports"
@@ -25,5 +25,5 @@ build() {
 package() {
   cd "$startdir/.."
   python -m installer --destdir="$pkgdir" dist/*.whl
-  install -Dm644 packaging/hearth.fish "$pkgdir/usr/share/fish/vendor_completions.d/hearth.fish"
+  install -Dm644 packaging/retrohub.fish "$pkgdir/usr/share/fish/vendor_completions.d/retrohub.fish"
 }

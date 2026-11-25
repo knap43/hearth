@@ -260,8 +260,8 @@ class LogView(Dialog):
 
 # --- main screen ---------------------------------------------------------------------
 
-class Hearth(App):
-    TITLE = "Hearth"
+class RetroHub(App):
+    TITLE = "RetroHub"
     CSS = """
     #main { height: 1fr; }
     #left { width: 2fr; }
@@ -432,7 +432,7 @@ class Hearth(App):
         self.update_details()
 
     def empty_hint(self) -> str:
-        lines = ["[b]No games found.[/b]", "", "Hearth looks in:"]
+        lines = ["[b]No games found.[/b]", "", "RetroHub looks in:"]
         places = [("Windows", WINDOWS), ("Linux", LINUX)] + [(s.title, s.id) for s in SYSTEMS.values()]
         for label, platform in places:
             path = self.cfg.platform_dir(platform)
@@ -440,7 +440,7 @@ class Hearth(App):
             lines.append(f"  {label + ':':<15}{escape(tilde(path))}{state}")
         lines += ["", "Put each PC game in its own folder, and console ROMs straight into their",
                   "system's folder (sub-folders for categories are fine either way),",
-                  "or press [b]s[/b] to point Hearth elsewhere."]
+                  "or press [b]s[/b] to point RetroHub elsewhere."]
         return "\n".join(lines)
 
     def selected_key(self) -> str | None:
@@ -660,8 +660,8 @@ class Hearth(App):
 
 
 def run_tui() -> None:
-    app = Hearth()
+    app = RetroHub()
     app.run()
     still = app.record_running()
     if still:
-        print(f"{still} game(s) still running; Hearth counted their playtime up to now.")
+        print(f"{still} game(s) still running; RetroHub counted their playtime up to now.")

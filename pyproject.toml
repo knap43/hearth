@@ -3,7 +3,7 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hearth"
+name = "retrohub"
 version = "0.1.0"
 description = "A terminal game launcher: Windows games through Proton (umu-launcher) with a Wine fallback, native Linux ports, and console emulators"
 readme = "README.md"
@@ -16,7 +16,7 @@ dependencies = ["textual>=1.0"]
 dev = ["pytest"]
 
 [project.scripts]
-hearth = "hearth.cli:main"
+retrohub = "retrohub.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

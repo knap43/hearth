@@ -6,9 +6,9 @@ that holds only folders is a *category* and is descended into (up to max_depth);
 a folder holding files, or the usual game subfolders (bin, Binaries, *_Data, ...),
 is a *game*. Marker files override the guess:
 
-    .hearth-game      treat this folder as a game
-    .hearth-category  treat this folder as a category
-    .hearth-ignore    skip this folder entirely
+    .retrohub-game      treat this folder as a game
+    .retrohub-category  treat this folder as a category
+    .retrohub-ignore    skip this folder entirely
 """
 
 from __future__ import annotations
@@ -24,9 +24,9 @@ WINDOWS = "windows"
 LINUX = "linux"
 PLATFORMS = (WINDOWS, LINUX)
 
-GAME_MARK = ".hearth-game"
-CATEGORY_MARK = ".hearth-category"
-IGNORE_MARK = ".hearth-ignore"
+GAME_MARK = ".retrohub-game"
+CATEGORY_MARK = ".retrohub-category"
+IGNORE_MARK = ".retrohub-ignore"
 
 TRIVIAL_FILES = {"desktop.ini", "thumbs.db", ".directory", ".ds_store", "folder.jpg", "folder.png"}
 GAME_SUBDIRS = {
