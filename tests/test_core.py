@@ -170,7 +170,7 @@ def test_config_and_store_roundtrip(tmp_path):
 
 @pytest.fixture
 def consoles(tmp_path):
-    ps1, n64, gc = tmp_path / "PS1", tmp_path / "N64", tmp_path / "GameCube"
+    ps1, ps2, n64 = tmp_path / "PS1", tmp_path / "PS2", tmp_path / "N64"
     # a .cue with its tracks, a .chd, a multi-disc set behind an .m3u, a stray file
     (ps1 / "Crash.cue").parent.mkdir(parents=True)
     (ps1 / "Crash.cue").write_text('FILE "Crash (Track 1).bin" BINARY\n  TRACK 01 MODE2/2352\n'
@@ -188,7 +188,7 @@ def consoles(tmp_path):
     touch(ps1 / "Junk" / ".retrohub-ignore", data=b"")
     touch(ps1 / "Junk" / "Skip.chd")
     touch(n64 / "Mario.z64")
-    touch(gc / "Zelda.rvz")
+    touch(ps2 / "Gran Turismo.iso")
 
     cfg = Config()
     cfg.library.root = str(tmp_path)
@@ -198,7 +198,7 @@ def consoles(tmp_path):
 def test_scan_consoles(consoles):
     games = {g.key: g for g in scan_library(consoles)}
     assert set(games) == {"ps1/Crash.cue", "ps1/Spyro.chd", "ps1/RPG/Final/Final.m3u",
-                          "n64/Mario.z64", "gamecube/Zelda.rvz"}
+                          "n64/Mario.z64", "ps2/Gran Turismo.iso"}
     final = games["ps1/RPG/Final/Final.m3u"]
     assert (final.folder, final.category, final.platform) == ("Final", "RPG / Final", "ps1")
 
@@ -219,16 +219,16 @@ def test_console_launch(consoles, monkeypatch):
 
 def test_console_emulator_missing(consoles, monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda name: None)
-    game = next(g for g in scan_library(consoles) if g.platform == "gamecube")
-    with pytest.raises(LaunchError, match="Dolphin"):
+    game = next(g for g in scan_library(consoles) if g.platform == "ps2")
+    with pytest.raises(LaunchError, match="PCSX2"):
         build_launch(game, GameState(), consoles, base_env={})
 
 
 def test_console_config_roundtrip(tmp_path):
     cfg = Config()
     cfg.emulators.ps2 = "pcsx2 -fullscreen %rom%"
-    cfg.emulators.wii_dir = "/mnt/wii"
+    cfg.emulators.n64_dir = "/mnt/n64"
     save_config(cfg, tmp_path / "c.toml")
     back = load_config(tmp_path / "c.toml")
     assert back.emulators.ps2 == "pcsx2 -fullscreen %rom%"
-    assert back.platform_dir("wii") == Path("/mnt/wii")
+    assert back.platform_dir("n64") == Path("/mnt/n64")

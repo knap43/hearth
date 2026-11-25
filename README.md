@@ -3,7 +3,7 @@
 A terminal game launcher for Linux. It scans your games folder, runs Windows games through
 **Proton via [umu-launcher](https://github.com/Open-Wine-Components/umu-launcher)** (with
 **Wine** as the fallback), starts native Linux ports directly, and plays **PlayStation,
-PlayStation 2, Nintendo 64, GameCube and Wii** ROMs through their emulators.
+PlayStation 2 and Nintendo 64** ROMs through their emulators.
 
 ## Library layout
 
@@ -21,7 +21,7 @@ PlayStation 2, Nintendo 64, GameCube and Wii** ROMs through their emulators.
 │   ├── Crash.cue           a .cue stands for the .bin tracks it names
 │   └── RPG/                sub-folders are categories
 │       └── Final.m3u       an .m3u is one multi-disc game
-├── PS2/  N64/  GameCube/  Wii/
+├── PS2/  N64/
 ```
 
 A folder holding files, or typical game sub-folders (`bin`, `Binaries`, `*_Data`, …), is
@@ -46,8 +46,6 @@ the choice.
 | `PS1` | PlayStation | DuckStation | `.cue` `.chd` `.pbp` `.m3u` `.iso` `.img` `.bin` `.ecm` `.mds` |
 | `PS2` | PlayStation 2 | PCSX2 | `.iso` `.chd` `.cso` `.zso` `.gz` `.bin` `.cue` `.img` `.mdf` `.nrg` `.m3u` `.elf` |
 | `N64` | Nintendo 64 | Mupen64Plus | `.z64` `.n64` `.v64` `.zip` |
-| `GameCube` | GameCube | Dolphin | `.iso` `.gcm` `.gcz` `.rvz` `.ciso` `.wia` `.dol` `.elf` `.m3u` |
-| `Wii` | Wii | Dolphin | `.iso` `.wbfs` `.rvz` `.wia` `.gcz` `.ciso` `.wad` `.dol` `.elf` |
 
 Games start fullscreen and straight into the game, and the emulator closes with it:
 
@@ -55,7 +53,6 @@ Games start fullscreen and straight into the game, and the emulator closes with 
 duckstation -batch -fullscreen -- %rom%
 pcsx2 -batch -nogui -fullscreen -- %rom%
 mupen64plus --fullscreen %rom%
-dolphin-emu -b -C Dolphin.Display.Fullscreen=True -e %rom%      (GameCube and Wii)
 ```
 
 Each command can be changed in Settings, and per game with `e`; `%rom%` is the ROM's path (without

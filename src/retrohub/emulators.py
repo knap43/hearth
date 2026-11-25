@@ -39,12 +39,6 @@ SYSTEMS: dict[str, System] = {s.id: s for s in (
     System("n64", "N64", "Nintendo 64", "Mupen64Plus", "N64",
            f"mupen64plus --fullscreen {ROM}",
            frozenset({".z64", ".n64", ".v64", ".zip"})),
-    System("gamecube", "GameCube", "GameCube", "Dolphin", "GameCube",
-           f"dolphin-emu -b -C Dolphin.Display.Fullscreen=True -e {ROM}",
-           frozenset({".iso", ".gcm", ".gcz", ".rvz", ".ciso", ".wia", ".dol", ".elf", ".m3u"})),
-    System("wii", "Wii", "Wii", "Dolphin", "Wii",
-           f"dolphin-emu -b -C Dolphin.Display.Fullscreen=True -e {ROM}",
-           frozenset({".iso", ".wbfs", ".rvz", ".wia", ".gcz", ".ciso", ".wad", ".dol", ".elf"})),
 )}
 
 _CUE_FILE = re.compile(r'^\s*FILE\s+(?:"([^"]+)"|(\S+))', re.I)
