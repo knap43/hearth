@@ -269,6 +269,10 @@ class RetroHub(App):
        with half blocks that sit off the table's edge in many terminal fonts */
     #search { border: none; height: 1; padding: 0 1; margin: 0 0 1 0; background: $panel; }
     #search:focus { border: none; background: $panel-lighten-1; }
+    /* With the terminal's colours, raised parts use its first palette colour */
+    #search:ansi, #search:ansi:focus { background: ansi_black; }
+    #details:ansi { border-left: solid ansi_black; }
+    #log:ansi { border: tall ansi_black; }
     #games { height: 1fr; }
     #message { padding: 1 2; color: $text-muted; }
     #details { width: 1fr; min-width: 38; border-left: solid $panel; padding: 0 1; }
@@ -306,6 +310,10 @@ class RetroHub(App):
     def __init__(self, cfg: Config | None = None, store: GameStore | None = None):
         super().__init__()
         self.cfg = cfg or load_config()
+        if self.cfg.interface.terminal_colours:
+            # The terminal's palette and background, so RetroHub follows its theme
+            self.ansi_color = True
+            self.theme = "ansi-dark"
         self.store = store or GameStore()
         self.games: list[Game] = []
         self.by_key: dict[str, Game] = {}

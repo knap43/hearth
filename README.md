@@ -96,6 +96,17 @@ retrohub run -w hollow    # stay attached: output here, playtime counted
 retrohub doctor           # paths, umu/wine and installed Proton builds
 ```
 
+## Colours
+
+RetroHub uses the terminal's own colours: its 16-colour palette and its background, so it follows
+whatever theme the terminal has. For Textual's built-in dark theme instead, set this in
+`config.toml`:
+
+```toml
+[interface]
+terminal_colours = false
+```
+
 ## Files
 
 * `~/.config/retrohub/config.toml`: settings (also editable in the TUI with `s`)

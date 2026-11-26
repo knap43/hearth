@@ -70,12 +70,20 @@ Emulators = make_dataclass("Emulators", [
 
 
 @dataclass
+class Interface:
+    # Use the terminal's own colours (its 16-colour palette and background), so
+    # RetroHub matches the terminal's theme; false: Textual's built-in dark theme.
+    terminal_colours: bool = True
+
+
+@dataclass
 class Config:
     library: Library = field(default_factory=Library)
     proton: Proton = field(default_factory=Proton)
     wine: Wine = field(default_factory=Wine)
     launch: Launch = field(default_factory=Launch)
     emulators: Emulators = field(default_factory=Emulators)
+    interface: Interface = field(default_factory=Interface)
 
     def platform_dir(self, platform: str) -> Path:
         if platform in SYSTEMS:
